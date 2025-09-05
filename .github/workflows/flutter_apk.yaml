@@ -1,0 +1,49 @@
+name: Flutter APK Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    strategy:
+      matrix:
+        project_path: ["tripbudgeter", "tripbudgeter_admin"]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Install Dependencies for ${{ matrix.project_path }}
+        run: flutter pub get
+        working-directory: ${{ matrix.project_path }}
+
+      - name: Build Flutter APK for ${{ matrix.project_path }}
+        run: flutter build apk --release
+        working-directory: ${{ matrix.project_path }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          files: ${{ matrix.project_path }}/build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ matrix.project_path }} v1.0.${{ github.run_number }}
+          tag_name: ${{ matrix.project_path }}-v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
