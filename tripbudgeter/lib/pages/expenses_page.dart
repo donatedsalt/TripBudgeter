@@ -28,7 +28,7 @@ class ExpensesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(16.0),
       children: [
         // Current Trip
         Column(

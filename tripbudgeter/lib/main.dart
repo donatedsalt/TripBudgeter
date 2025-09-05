@@ -45,14 +45,14 @@ class _TripBudgeterHomePageState extends State<TripBudgeterHomePage> {
     MorePage(),
   ];
 
-  final List<PreferredSizeWidget> _appBars = [
+  final List<PreferredSizeWidget> _appBars = const [
     HomePageAppBar(),
     TripsPageAppBar(),
     ExpensesPageAppBar(),
     MorePageAppBar(),
   ];
 
-  final List<Widget> _floatingActionButtons = [
+  final List<Widget> _floatingActionButtons = const [
     HomePageFloatingActionButton(),
     TripsPageFloatingActionButton(),
     ExpensesPageFloatingActionButton(),
