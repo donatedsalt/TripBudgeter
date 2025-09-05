@@ -23,20 +23,21 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Trip Budgeter',
       theme: theme,
-      home: const TripBudgeterHomePage(),
+      home: const TripBudgeterApp(),
     );
   }
 }
 
-class TripBudgeterHomePage extends StatefulWidget {
-  const TripBudgeterHomePage({super.key});
+class TripBudgeterApp extends StatefulWidget {
+  const TripBudgeterApp({super.key});
 
   @override
-  State<TripBudgeterHomePage> createState() => _TripBudgeterHomePageState();
+  State<TripBudgeterApp> createState() => _TripBudgeterAppState();
 }
 
-class _TripBudgeterHomePageState extends State<TripBudgeterHomePage> {
-  int _currentIndex = 0;
+class _TripBudgeterAppState extends State<TripBudgeterApp>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
 
   final List<Widget> _pages = const [
     HomePage(),
@@ -60,24 +61,38 @@ class _TripBudgeterHomePageState extends State<TripBudgeterHomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _pages.length, vsync: this);
+
+    _tabController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: _appBars[_currentIndex],
-        body: _pages[_currentIndex],
+        appBar: _appBars[_tabController.index],
+        body: TabBarView(controller: _tabController, children: _pages),
         bottomNavigationBar: customNavigationBar(context),
-        floatingActionButton: _floatingActionButtons[_currentIndex],
+        floatingActionButton: _floatingActionButtons[_tabController.index],
       ),
     );
   }
 
   NavigationBar customNavigationBar(BuildContext context) {
     return NavigationBar(
-      selectedIndex: _currentIndex,
+      selectedIndex: _tabController.index,
       onDestinationSelected: (int index) {
-        setState(() {
-          _currentIndex = index;
-        });
+        _tabController.animateTo(index);
       },
       destinations: [
         NavigationDestination(
