@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:tripbudgeter/main.dart';
+
 class MorePageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MorePageAppBar({super.key});
 
@@ -31,7 +33,7 @@ class MorePage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 64.0),
           child: Text(
-            "Welcome, Michael!",
+            "Welcome, ${supabase.auth.currentUser?.userMetadata?["username"]}!",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
@@ -98,7 +100,13 @@ class MorePage extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Logout"),
-              onTap: () {},
+              onTap: () {
+                supabase.auth.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyApp()),
+                );
+              },
             ),
           ],
         ),

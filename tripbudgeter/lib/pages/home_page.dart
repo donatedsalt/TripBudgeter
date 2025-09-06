@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripbudgeter/main.dart';
 
 class HomePageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const HomePageAppBar({super.key});
@@ -22,6 +23,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -34,7 +36,7 @@ class HomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24.0),
               child: Text(
-                "Welcome, Michael!",
+                "Welcome, ${supabase.auth.currentUser?.userMetadata?["username"]}!",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),

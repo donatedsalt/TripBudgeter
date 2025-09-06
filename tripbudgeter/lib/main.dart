@@ -1,42 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:tripbudgeter/pages/home_page.dart';
+import 'package:tripbudgeter/pages/signin_page.dart';
 import 'package:tripbudgeter/pages/trips_page.dart';
 import 'package:tripbudgeter/pages/expenses_page.dart';
 import 'package:tripbudgeter/pages/more_page.dart';
 
-void main() {
+Future<void> main() async {
+  await Supabase.initialize(
+    url: 'https://hcaqdnseedcrpaootjul.supabase.co',
+    anonKey: 'sb_publishable_dd22eyw9CvDUPAcpaFKT_Q_XjrwoNxw',
+  );
   runApp(const MyApp());
 }
+
+final supabase = Supabase.instance.client;
 
 final theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
   useMaterial3: true,
 );
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Trip Budgeter',
-      theme: theme,
-      home: const TripBudgeterApp(),
-    );
-  }
+  State<MyApp> createState() => _MyAppState();
 }
 
-class TripBudgeterApp extends StatefulWidget {
-  const TripBudgeterApp({super.key});
-
-  @override
-  State<TripBudgeterApp> createState() => _TripBudgeterAppState();
-}
-
-class _TripBudgeterAppState extends State<TripBudgeterApp>
-    with SingleTickerProviderStateMixin {
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   final List<Widget> _pages = const [
@@ -78,13 +71,21 @@ class _TripBudgeterAppState extends State<TripBudgeterApp>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: _appBars[_tabController.index],
-        body: TabBarView(controller: _tabController, children: _pages),
-        bottomNavigationBar: customNavigationBar(context),
-        floatingActionButton: _floatingActionButtons[_tabController.index],
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Trip Budgeter',
+      theme: theme,
+      home: supabase.auth.currentUser == null
+          ? SigninPage()
+          : SafeArea(
+              child: Scaffold(
+                appBar: _appBars[_tabController.index],
+                body: TabBarView(controller: _tabController, children: _pages),
+                bottomNavigationBar: customNavigationBar(context),
+                floatingActionButton:
+                    _floatingActionButtons[_tabController.index],
+              ),
+            ),
     );
   }
 
@@ -128,6 +129,19 @@ class _TripBudgeterAppState extends State<TripBudgeterApp>
           label: "More",
         ),
       ],
+    );
+  }
+}
+
+extension ContextExtension on BuildContext {
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError
+            ? Theme.of(this).colorScheme.error
+            : Theme.of(this).snackBarTheme.backgroundColor,
+      ),
     );
   }
 }
