@@ -88,7 +88,7 @@ class _TripBudgeterAppState extends State<TripBudgeterApp>
     );
   }
 
-  NavigationBar customNavigationBar(BuildContext context) {
+  Widget customNavigationBar(BuildContext context) {
     return NavigationBar(
       selectedIndex: _tabController.index,
       onDestinationSelected: (int index) {
