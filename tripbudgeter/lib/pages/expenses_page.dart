@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripbudgeter/pages/add_expense_page.dart';
 
 class ExpensesPageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const ExpensesPageAppBar({super.key});
@@ -121,6 +122,14 @@ class ExpensesPageFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(onPressed: () {}, child: Icon(Icons.add));
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AddExpensePage()),
+        );
+      },
+      child: Icon(Icons.add),
+    );
   }
 }
