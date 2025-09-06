@@ -32,7 +32,7 @@ class _SigninPageState extends State<SigninPage> {
         password: _passwordController.text.trim(),
       );
       if (mounted) {
-        context.showSnackBar('Loading...');
+        context.showSnackBar('Signed in successfully');
         _emailController.clear();
         _passwordController.clear();
       }
@@ -60,7 +60,6 @@ class _SigninPageState extends State<SigninPage> {
         final session = data.session;
         if (session != null) {
           _redirecting = true;
-          Navigator.pushReplacementNamed(context, "/");
         }
       },
       onError: (error) {

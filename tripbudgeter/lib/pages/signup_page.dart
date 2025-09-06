@@ -65,7 +65,6 @@ class _SignupPageState extends State<SignupPage> {
         final session = data.session;
         if (session != null) {
           _redirecting = true;
-          Navigator.pushReplacementNamed(context, "/");
         }
       },
       onError: (error) {

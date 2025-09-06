@@ -11,6 +11,7 @@ import 'package:tripbudgeter/pages/add_expense_page.dart';
 import 'package:tripbudgeter/pages/add_trip_page.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://hcaqdnseedcrpaootjul.supabase.co',
     anonKey: 'sb_publishable_dd22eyw9CvDUPAcpaFKT_Q_XjrwoNxw',
@@ -25,14 +26,60 @@ final theme = ThemeData(
   useMaterial3: true,
 );
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/signin': (context) => const SigninPage(),
+        '/signup': (context) => const SignupPage(),
+        '/trip/add': (context) => const AddTripPage(),
+        '/expense/add': (context) => const AddExpensePage(),
+      },
+      debugShowCheckedModeBanner: false,
+      title: 'Trip Budgeter',
+      theme: theme,
+      home: const AuthGate(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<AuthState>(
+      stream: supabase.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final session = snapshot.data!.session;
+        if (session == null) {
+          return const SigninPage();
+        } else {
+          return const MainAppPages();
+        }
+      },
+    );
+  }
+}
+
+class MainAppPages extends StatefulWidget {
+  const MainAppPages({super.key});
+
+  @override
+  State<MainAppPages> createState() => _MainAppPagesState();
+}
+
+class _MainAppPagesState extends State<MainAppPages>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   final List<Widget> _pages = const [
@@ -60,7 +107,6 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: _pages.length, vsync: this);
-
     _tabController.addListener(() {
       setState(() {});
     });
@@ -74,29 +120,13 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const MyApp(),
-        '/signin': (context) => const SigninPage(),
-        '/signup': (context) => const SignupPage(),
-        '/trip/add': (context) => const AddTripPage(),
-        '/expense/add': (context) => const AddExpensePage(),
-      },
-      debugShowCheckedModeBanner: false,
-      title: 'Trip Budgeter',
-      theme: theme,
-      home: supabase.auth.currentUser == null
-          ? SigninPage()
-          : SafeArea(
-              child: Scaffold(
-                appBar: _appBars[_tabController.index],
-                body: TabBarView(controller: _tabController, children: _pages),
-                bottomNavigationBar: customNavigationBar(context),
-                floatingActionButton:
-                    _floatingActionButtons[_tabController.index],
-              ),
-            ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: _appBars[_tabController.index],
+        body: TabBarView(controller: _tabController, children: _pages),
+        bottomNavigationBar: customNavigationBar(context),
+        floatingActionButton: _floatingActionButtons[_tabController.index],
+      ),
     );
   }
 
@@ -108,7 +138,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       },
       destinations: [
         NavigationDestination(
-          icon: Icon(Icons.home_outlined),
+          icon: const Icon(Icons.home_outlined),
           selectedIcon: Icon(
             Icons.home_rounded,
             color: Theme.of(context).colorScheme.primary,
@@ -116,7 +146,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           label: "Home",
         ),
         NavigationDestination(
-          icon: Icon(Icons.pin_drop_outlined),
+          icon: const Icon(Icons.pin_drop_outlined),
           selectedIcon: Icon(
             Icons.pin_drop_rounded,
             color: Theme.of(context).colorScheme.primary,
@@ -124,7 +154,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           label: "Trips",
         ),
         NavigationDestination(
-          icon: Icon(Icons.monetization_on_outlined),
+          icon: const Icon(Icons.monetization_on_outlined),
           selectedIcon: Icon(
             Icons.monetization_on,
             color: Theme.of(context).colorScheme.primary,
@@ -132,7 +162,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           label: "Expenses",
         ),
         NavigationDestination(
-          icon: Icon(Icons.more_horiz),
+          icon: const Icon(Icons.more_horiz),
           selectedIcon: Icon(
             Icons.more,
             color: Theme.of(context).colorScheme.primary,
