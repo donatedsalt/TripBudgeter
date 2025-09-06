@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:tripbudgeter/main.dart';
-import 'package:tripbudgeter/pages/signin_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -40,10 +39,7 @@ class _SignupPageState extends State<SignupPage> {
         _emailController.clear();
         _usernameController.clear();
         _passwordController.clear();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SigninPage()),
-        );
+        Navigator.pushReplacementNamed(context, "/signin");
       }
     } on AuthException catch (error) {
       if (mounted) context.showSnackBar(error.message, isError: true);
@@ -69,9 +65,7 @@ class _SignupPageState extends State<SignupPage> {
         final session = data.session;
         if (session != null) {
           _redirecting = true;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MyApp()),
-          );
+          Navigator.pushReplacementNamed(context, "/");
         }
       },
       onError: (error) {
@@ -192,10 +186,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SigninPage()),
-                    );
+                    Navigator.pushReplacementNamed(context, "/signin");
                   },
                   child: Text("Already have an account? Sign In"),
                 ),

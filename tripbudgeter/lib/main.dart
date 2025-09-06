@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:tripbudgeter/pages/home_page.dart';
 import 'package:tripbudgeter/pages/signin_page.dart';
+import 'package:tripbudgeter/pages/signup_page.dart';
+import 'package:tripbudgeter/pages/home_page.dart';
 import 'package:tripbudgeter/pages/trips_page.dart';
 import 'package:tripbudgeter/pages/expenses_page.dart';
 import 'package:tripbudgeter/pages/more_page.dart';
+import 'package:tripbudgeter/pages/add_expense_page.dart';
+import 'package:tripbudgeter/pages/add_trip_page.dart';
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -72,6 +75,14 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MyApp(),
+        '/signin': (context) => const SigninPage(),
+        '/signup': (context) => const SignupPage(),
+        '/trip/add': (context) => const AddTripPage(),
+        '/expense/add': (context) => const AddExpensePage(),
+      },
       debugShowCheckedModeBanner: false,
       title: 'Trip Budgeter',
       theme: theme,

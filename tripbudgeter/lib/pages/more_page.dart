@@ -102,10 +102,7 @@ class MorePage extends StatelessWidget {
               title: Text("Logout"),
               onTap: () {
                 supabase.auth.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MyApp()),
-                );
+                Navigator.pushReplacementNamed(context, "/");
               },
             ),
           ],

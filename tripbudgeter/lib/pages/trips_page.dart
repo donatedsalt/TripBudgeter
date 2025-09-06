@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tripbudgeter/pages/add_trip_page.dart';
 
 class TripsPageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const TripsPageAppBar({super.key});
@@ -97,10 +96,7 @@ class TripsPageFloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AddTripPage()),
-        );
+        Navigator.pushReplacementNamed(context, "/trip/add");
       },
       child: Icon(Icons.add),
     );
