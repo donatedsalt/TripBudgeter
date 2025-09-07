@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripbudgeter/main.dart';
 
 class TripsPageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const TripsPageAppBar({super.key});
@@ -20,10 +21,52 @@ class _TripsPageAppBarState extends State<TripsPageAppBar> {
   }
 }
 
-class TripsPage extends StatelessWidget {
+class TripsPage extends StatefulWidget {
   const TripsPage({super.key});
+
+  @override
+  State<TripsPage> createState() => _TripsPageState();
+}
+
+class _TripsPageState extends State<TripsPage> {
+  bool _loading = false;
+
+  List<Map<String, dynamic>> _trips = [];
+  Map<String, dynamic> _currentTrip = {};
+
+  void fetchTrips() async {
+    setState(() {
+      _loading = true;
+    });
+    final data = await supabase
+        .from('trips')
+        .select()
+        .eq('user_id', supabase.auth.currentUser?.id ?? "")
+        .order('date', ascending: false);
+    if (mounted) {
+      setState(() {
+        _trips = data;
+        _currentTrip = _trips.firstWhere(
+          (trip) => trip["is_current"],
+          orElse: () => {},
+        );
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    fetchTrips();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return ListView(
       padding: EdgeInsets.all(16.0),
       children: [
@@ -38,19 +81,34 @@ class TripsPage extends StatelessWidget {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                leading: Icon(Icons.flight_takeoff),
-                title: Text("Paris"),
-                subtitle: Text("\$1280.00 / \$2000.00"),
-                trailing: Text("Jan 10"),
-                tileColor: Theme.of(context).colorScheme.primaryContainer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
+            _currentTrip.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text("No current trip"),
+                      subtitle: Text("Add a new trip to get started"),
+                      tileColor: Theme.of(context).colorScheme.primaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Icon(Icons.flight_takeoff),
+                      title: Text(_currentTrip["name"]),
+                      subtitle: Text(
+                        "\$${_currentTrip["spent"]} / \$${_currentTrip["budget"]}",
+                      ),
+                      trailing: Text(_currentTrip["date"]),
+                      tileColor: Theme.of(context).colorScheme.primaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
           ],
         ),
         // Completed Trips list
@@ -64,23 +122,33 @@ class TripsPage extends StatelessWidget {
                 ),
               ],
             ),
-            ListTile(
-              leading: Icon(Icons.flight_takeoff),
-              title: Text("Taiwan"),
-              subtitle: Text("\$1000.00"),
-              trailing: Text("Nov 01"),
-            ),
-            ListTile(
-              leading: Icon(Icons.flight_takeoff),
-              title: Text("Korea"),
-              subtitle: Text("\$2500.00"),
-              trailing: Text("Mar 16"),
-            ),
-            ListTile(
-              leading: Icon(Icons.flight_takeoff),
-              title: Text("Japan"),
-              subtitle: Text("\$4000.00"),
-              trailing: Text("Oct 21"),
+            Builder(
+              builder: (context) {
+                return Column(
+                  children: _trips
+                      .where((trip) => !trip["is_current"])
+                      .map(
+                        (trip) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListTile(
+                            leading: Icon(Icons.check_circle_outline),
+                            title: Text(trip["name"]),
+                            subtitle: Text(
+                              "\$${trip["spent"]} / \$${trip["budget"]}",
+                            ),
+                            trailing: Text(trip["date"]),
+                            tileColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
             ),
           ],
         ),
@@ -96,7 +164,7 @@ class TripsPageFloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        Navigator.pushReplacementNamed(context, "/trip/add");
+        Navigator.pushNamed(context, "/trip/add");
       },
       child: Icon(Icons.add),
     );

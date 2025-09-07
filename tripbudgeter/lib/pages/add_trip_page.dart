@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:tripbudgeter/main.dart';
 
 class AddTripPage extends StatefulWidget {
   const AddTripPage({super.key});
@@ -10,9 +13,48 @@ class AddTripPage extends StatefulWidget {
 class _AddTripPageState extends State<AddTripPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  bool _submitting = false;
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _budgetController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+
+  void _submit() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        setState(() {
+          _submitting = true;
+        });
+        await supabase
+            .from('trips')
+            .update({'is_current': false})
+            .eq('user_id', supabase.auth.currentUser?.id ?? "");
+        await supabase.from('trips').insert({
+          'user_id': supabase.auth.currentUser?.id,
+          'name': _nameController.text,
+          'budget': _budgetController.text,
+          'spent': 0,
+          'date': _dateController.text,
+          'is_current': true,
+        });
+
+        if (mounted) {
+          context.showSnackBar("Trip added successfully!");
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          context.showSnackBar("Failed to add trip: $e", isError: true);
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _submitting = false;
+          });
+        }
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -32,12 +74,23 @@ class _AddTripPageState extends State<AddTripPage> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           backgroundColor: Theme.of(context).colorScheme.primaryFixed,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              _submitting ? null : Navigator.pop(context);
+            },
+          ),
         ),
         body: Form(
           key: _formKey,
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
             children: [
+              Text(
+                "Adding a new trip will make it your current trip.",
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 24.0),
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -58,9 +111,14 @@ class _AddTripPageState extends State<AddTripPage> {
                   labelText: 'Trip Budget',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                ],
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter some text';
+                  } else if (double.tryParse(value) == null) {
+                    return 'Please enter a valid number';
                   }
                   return null;
                 },
@@ -105,7 +163,7 @@ class _AddTripPageState extends State<AddTripPage> {
               Expanded(
                 child: IconButton.outlined(
                   onPressed: () {
-                    Navigator.pop(context);
+                    _submitting ? null : Navigator.pop(context);
                   },
                   icon: const Icon(Icons.close),
                 ),
@@ -113,11 +171,17 @@ class _AddTripPageState extends State<AddTripPage> {
               Expanded(
                 child: IconButton.filled(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                    }
+                    _submitting ? null : _submit();
                   },
-                  icon: const Icon(Icons.check),
+                  icon: _submitting
+                      ? CircularProgressIndicator(
+                          constraints: BoxConstraints(
+                            minHeight: 24.0,
+                            minWidth: 24.0,
+                          ),
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        )
+                      : const Icon(Icons.check),
                 ),
               ),
             ],
