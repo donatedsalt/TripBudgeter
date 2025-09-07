@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:tripbudgeter/utils/icon_map.dart';
+
 import 'package:tripbudgeter/providers/expense_categories_provider.dart';
 
 /// A custom ListTile widget for displaying an expense with an icon based on its category.
@@ -28,12 +30,7 @@ class ExpenseListTile extends ConsumerWidget {
           orElse: () => {'icon': 'receipt'},
         );
 
-        final iconData = category.containsKey('icon')
-            ? IconData(
-                int.parse('0x${category['icon']}'),
-                fontFamily: 'MaterialIcons',
-              )
-            : Icons.receipt;
+        final iconData = iconMap[category['icon']] ?? Icons.receipt;
 
         return ListTile(
           leading: Icon(iconData),
