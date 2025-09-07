@@ -164,7 +164,7 @@ class _SigninPageState extends State<SigninPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, "/signup");
+                    Navigator.pushNamed(context, "/signup");
                   },
                   child: Text("Dont have an account? Sign Up"),
                 ),

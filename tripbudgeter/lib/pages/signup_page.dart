@@ -40,7 +40,7 @@ class _SignupPageState extends State<SignupPage> {
         _emailController.clear();
         _usernameController.clear();
         _passwordController.clear();
-        Navigator.pushReplacementNamed(context, "/signin");
+        Navigator.pop(context);
       }
     } on AuthException catch (error) {
       if (mounted) context.showSnackBar(error.message, isError: true);
@@ -186,7 +186,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, "/signin");
+                    Navigator.pop(context);
                   },
                   child: Text("Already have an account? Sign In"),
                 ),
