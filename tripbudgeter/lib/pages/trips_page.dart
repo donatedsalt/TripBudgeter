@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:tripbudgeter/providers/trips_provider.dart';
 
+import 'package:tripbudgeter/widgets/trip_list_tile.dart';
+
 class TripsPageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const TripsPageAppBar({super.key});
 
@@ -91,25 +93,7 @@ class TripsPage extends ConsumerWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8.0),
-                ...completedTrips.map(
-                  (trip) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: const Icon(Icons.check_circle_outline),
-                      title: Text(trip["name"]),
-                      subtitle: Text(
-                        "\$${trip["spent"]} / \$${trip["budget"]}",
-                      ),
-                      trailing: Text(trip["date"]),
-                      tileColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                  ),
-                ),
+                ...completedTrips.map((trip) => TripListTile(trip: trip)),
               ],
             ),
           ],
