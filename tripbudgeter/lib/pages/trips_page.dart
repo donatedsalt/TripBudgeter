@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:tripbudgeter/utils/supabase_config.dart';
+import 'package:tripbudgeter/providers/trips_provider.dart';
 
 class TripsPageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const TripsPageAppBar({super.key});
@@ -22,138 +23,98 @@ class _TripsPageAppBarState extends State<TripsPageAppBar> {
   }
 }
 
-class TripsPage extends StatefulWidget {
+class TripsPage extends ConsumerWidget {
   const TripsPage({super.key});
 
   @override
-  State<TripsPage> createState() => _TripsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tripsAsyncValue = ref.watch(tripsProvider);
 
-class _TripsPageState extends State<TripsPage> {
-  bool _loading = false;
-
-  List<Map<String, dynamic>> _trips = [];
-  Map<String, dynamic> _currentTrip = {};
-
-  void fetchTrips() async {
-    setState(() {
-      _loading = true;
-    });
-    final data = await supabase
-        .from('trips')
-        .select()
-        .eq('user_id', supabase.auth.currentUser?.id ?? "")
-        .order('date', ascending: false);
-    if (mounted) {
-      setState(() {
-        _trips = data;
-        _currentTrip = _trips.firstWhere(
+    return tripsAsyncValue.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
+      data: (trips) {
+        final currentTrip = trips.firstWhere(
           (trip) => trip["is_current"],
           orElse: () => {},
         );
-        _loading = false;
-      });
-    }
-  }
 
-  @override
-  void initState() {
-    fetchTrips();
-    super.initState();
-  }
+        final completedTrips = trips
+            .where((trip) => !trip["is_current"])
+            .toList();
 
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return ListView(
-      padding: EdgeInsets.all(16.0),
-      children: [
-        // Current Trip
-        Column(
+        return ListView(
+          padding: const EdgeInsets.all(16.0),
           children: [
-            Row(
+            // Current Trip Section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Current Trip",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-            _currentTrip.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text("No current trip"),
-                      subtitle: Text("Add a new trip to get started"),
-                      tileColor: Theme.of(context).colorScheme.primaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                const SizedBox(height: 8.0),
+                if (currentTrip.isEmpty)
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: const Text("No current trip"),
+                    subtitle: const Text("Add a new trip to get started"),
+                    tileColor: Theme.of(context).colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                   )
-                : Padding(
+                else
+                  ListTile(
+                    leading: const Icon(Icons.flight_takeoff),
+                    title: Text(currentTrip["name"]),
+                    subtitle: Text(
+                      "\$${currentTrip["spent"]} / \$${currentTrip["budget"]}",
+                    ),
+                    trailing: Text(currentTrip["date"]),
+                    tileColor: Theme.of(context).colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+              ],
+            ),
+
+            // Completed Trips list section
+            const SizedBox(height: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Completed Trips",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                ...completedTrips.map(
+                  (trip) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      leading: Icon(Icons.flight_takeoff),
-                      title: Text(_currentTrip["name"]),
+                      leading: const Icon(Icons.check_circle_outline),
+                      title: Text(trip["name"]),
                       subtitle: Text(
-                        "\$${_currentTrip["spent"]} / \$${_currentTrip["budget"]}",
+                        "\$${trip["spent"]} / \$${trip["budget"]}",
                       ),
-                      trailing: Text(_currentTrip["date"]),
-                      tileColor: Theme.of(context).colorScheme.primaryContainer,
+                      trailing: Text(trip["date"]),
+                      tileColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                   ),
-          ],
-        ),
-        // Completed Trips list
-        Column(
-          children: [
-            Row(
-              children: [
-                Text(
-                  "Completed Trips",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            Builder(
-              builder: (context) {
-                return Column(
-                  children: _trips
-                      .where((trip) => !trip["is_current"])
-                      .map(
-                        (trip) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            leading: Icon(Icons.check_circle_outline),
-                            title: Text(trip["name"]),
-                            subtitle: Text(
-                              "\$${trip["spent"]} / \$${trip["budget"]}",
-                            ),
-                            trailing: Text(trip["date"]),
-                            tileColor: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
-            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

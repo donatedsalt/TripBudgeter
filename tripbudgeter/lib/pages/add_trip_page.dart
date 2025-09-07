@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:tripbudgeter/utils/supabase_config.dart';
 import 'package:tripbudgeter/utils/context_extension.dart';
 
-class AddTripPage extends StatefulWidget {
+import 'package:tripbudgeter/providers/trips_provider.dart';
+
+class AddTripPage extends ConsumerStatefulWidget {
   const AddTripPage({super.key});
 
   @override
-  State<AddTripPage> createState() => _AddTripPageState();
+  ConsumerState<AddTripPage> createState() => _AddTripPageState();
 }
 
-class _AddTripPageState extends State<AddTripPage> {
+class _AddTripPageState extends ConsumerState<AddTripPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _submitting = false;
@@ -26,20 +29,23 @@ class _AddTripPageState extends State<AddTripPage> {
         setState(() {
           _submitting = true;
         });
+
         await supabase
             .from('trips')
             .update({'is_current': false})
             .eq('user_id', supabase.auth.currentUser?.id ?? "");
+
         await supabase.from('trips').insert({
           'user_id': supabase.auth.currentUser?.id,
           'name': _nameController.text,
-          'budget': _budgetController.text,
-          'spent': 0,
+          'budget': double.parse(_budgetController.text),
+          'spent': 0.0,
           'date': _dateController.text,
           'is_current': true,
         });
 
         if (mounted) {
+          ref.invalidate(tripsProvider);
           context.showSnackBar("Trip added successfully!");
           Navigator.pop(context);
         }
@@ -82,19 +88,25 @@ class _AddTripPageState extends State<AddTripPage> {
             },
           ),
         ),
+
         body: Form(
           key: _formKey,
           child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 24.0,
+            ),
             children: [
-              Text(
+              const Text(
                 "Adding a new trip will make it your current trip.",
                 style: TextStyle(fontSize: 16),
               ),
-              SizedBox(height: 24.0),
+              const SizedBox(height: 24.0),
+
+              // trip name field
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Trip Name',
                   border: OutlineInputBorder(),
                 ),
@@ -105,10 +117,15 @@ class _AddTripPageState extends State<AddTripPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 24.0),
+              const SizedBox(height: 24.0),
+
+              // trip budget field
               TextFormField(
                 controller: _budgetController,
-                decoration: InputDecoration(
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
                   labelText: 'Trip Budget',
                   border: OutlineInputBorder(),
                 ),
@@ -124,10 +141,12 @@ class _AddTripPageState extends State<AddTripPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 24.0),
+              const SizedBox(height: 24.0),
+
+              // trip date field
               TextFormField(
                 controller: _dateController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Trip Date',
                   border: OutlineInputBorder(),
                   suffixIcon: Icon(Icons.calendar_month),
@@ -144,11 +163,11 @@ class _AddTripPageState extends State<AddTripPage> {
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(Duration(days: 365 * 5)),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                   );
                   if (date != null) {
                     _dateController.text =
-                        "${date.day.toString()}/${date.month.toString()}/${date.year.toString()}";
+                        "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year.toString()}";
                   }
                 },
                 readOnly: true,
@@ -156,10 +175,11 @@ class _AddTripPageState extends State<AddTripPage> {
             ],
           ),
         ),
+
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
-            spacing: 12.0,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: IconButton.outlined(
@@ -169,18 +189,18 @@ class _AddTripPageState extends State<AddTripPage> {
                   icon: const Icon(Icons.close),
                 ),
               ),
+              const SizedBox(width: 12.0),
               Expanded(
                 child: IconButton.filled(
-                  onPressed: () {
-                    _submitting ? null : _submit();
-                  },
+                  onPressed: _submitting ? null : _submit,
                   icon: _submitting
-                      ? CircularProgressIndicator(
-                          constraints: BoxConstraints(
-                            minHeight: 24.0,
-                            minWidth: 24.0,
+                      ? SizedBox(
+                          height: 24.0,
+                          width: 24.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
-                          color: Theme.of(context).colorScheme.onPrimary,
                         )
                       : const Icon(Icons.check),
                 ),

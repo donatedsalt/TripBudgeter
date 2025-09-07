@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:tripbudgeter/utils/supabase_config.dart';
 
@@ -18,7 +19,7 @@ Future<void> main() async {
     url: 'https://hcaqdnseedcrpaootjul.supabase.co',
     anonKey: 'sb_publishable_dd22eyw9CvDUPAcpaFKT_Q_XjrwoNxw',
   );
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 final theme = ThemeData(
