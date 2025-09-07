@@ -38,6 +38,7 @@ class MorePage extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
+
         // More options header and list of options
         Column(
           children: [
@@ -56,6 +57,7 @@ class MorePage extends StatelessWidget {
             ),
           ],
         ),
+
         // Settings header and list of settings
         Column(
           children: [
