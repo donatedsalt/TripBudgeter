@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:tripbudgeter/main.dart';
+import 'package:tripbudgeter/utils/supabase_config.dart';
+import 'package:tripbudgeter/utils/context_extension.dart';
 
 class AddTripPage extends StatefulWidget {
   const AddTripPage({super.key});

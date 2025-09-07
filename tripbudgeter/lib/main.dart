@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:tripbudgeter/utils/supabase_config.dart';
+
 import 'package:tripbudgeter/pages/signin_page.dart';
 import 'package:tripbudgeter/pages/signup_page.dart';
 import 'package:tripbudgeter/pages/home_page.dart';
@@ -18,8 +20,6 @@ Future<void> main() async {
   );
   runApp(const MyApp());
 }
-
-final supabase = Supabase.instance.client;
 
 final theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -170,19 +170,6 @@ class _MainAppPagesState extends State<MainAppPages>
           label: "More",
         ),
       ],
-    );
-  }
-}
-
-extension ContextExtension on BuildContext {
-  void showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError
-            ? Theme.of(this).colorScheme.error
-            : Theme.of(this).snackBarTheme.backgroundColor,
-      ),
     );
   }
 }

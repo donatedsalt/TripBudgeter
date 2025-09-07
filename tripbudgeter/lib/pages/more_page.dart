@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:tripbudgeter/main.dart';
+import 'package:tripbudgeter/utils/supabase_config.dart';
 
 class MorePageAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MorePageAppBar({super.key});

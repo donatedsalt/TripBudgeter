@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:tripbudgeter/main.dart';
+import 'package:tripbudgeter/utils/supabase_config.dart';
+import 'package:tripbudgeter/utils/context_extension.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
