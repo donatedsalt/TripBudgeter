@@ -11,10 +11,6 @@ jobs:
     permissions:
       contents: write
 
-    strategy:
-      matrix:
-        project_path: ["tripbudgeter", "tripbudgeter_admin"]
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -30,20 +26,20 @@ jobs:
         with:
           channel: "stable"
 
-      - name: Install Dependencies for ${{ matrix.project_path }}
+      - name: Install Dependencies
         run: flutter pub get
-        working-directory: ${{ matrix.project_path }}
+        working-directory: tripbudgeter
 
-      - name: Build Flutter APK for ${{ matrix.project_path }}
+      - name: Build Flutter APK
         run: flutter build apk --release
-        working-directory: ${{ matrix.project_path }}
+        working-directory: tripbudgeter
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          files: ${{ matrix.project_path }}/build/app/outputs/flutter-apk/app-release.apk
-          name: Release ${{ matrix.project_path }} v1.0.${{ github.run_number }}
-          tag_name: ${{ matrix.project_path }}-v1.0.${{ github.run_number }}
+          files: tripbudgeter/build/app/outputs/flutter-apk/app-release.apk
+          name: Release tripbudgeter v1.0.${{ github.run_number }}
+          tag_name: tripbudgeter-v1.0.${{ github.run_number }}
           draft: false
           prerelease: false
